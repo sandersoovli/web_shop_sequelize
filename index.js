@@ -3,6 +3,9 @@ const sequelize = require("./config/database");
 const { User, Cart } = require("./models/index");
 const adminRoutes = require("./routes/admin");
 const cartRoutes = require("./routes/cart");
+const orderRoutes = require("./routes/order");
+
+
 const app = express();
 const PORT = 3035;
 
@@ -49,3 +52,7 @@ app.use("/admin", adminRoutes);
 
 // Cart routes
 app.use("/cart", cartRoutes);
+
+//order routes
+app.use("/order", orderRoutes);
+
