@@ -1,10 +1,22 @@
 const Product = require("../../models/product");
+const { User } = require("../../models/index");
 
 // Toodete loomine
 exports.createProduct = async (req, res) => {
   try {
     const { name, price, description } = req.body;
-    const product = await Product.create({ name, price, description });
+
+    // Dummy kasutaja leidmine
+    const user = await User.findOne({ where: { email: "test@example.com" } });
+    if (!user) return res.status(400).json({ error: "Kasutajat ei leitud" });
+
+    const product = await Product.create({
+      name,
+      price,
+      description,
+      UserId: user.id // seos kasutajaga
+    });
+
     res.status(201).json(product);
   } catch (error) {
     console.error(error);
@@ -12,10 +24,10 @@ exports.createProduct = async (req, res) => {
   }
 };
 
-// Kõikide toodete pärimine (admin)
+// Kõik tooted (admin)
 exports.getProducts = async (req, res) => {
   try {
-    const products = await Product.findAll();
+    const products = await Product.findAll({ include: User });
     res.json(products);
   } catch (error) {
     console.error(error);
@@ -23,10 +35,10 @@ exports.getProducts = async (req, res) => {
   }
 };
 
-// Konkreetse toote pärimine ID järgi (admin ja tavakasutaja)
+// Konkreetne toode ID järgi
 exports.getProductById = async (req, res) => {
   try {
-    const product = await Product.findByPk(req.params.id);
+    const product = await Product.findByPk(req.params.id, { include: User });
     if (!product) return res.status(404).json({ error: "Toodet ei leitud" });
     res.json(product);
   } catch (error) {
@@ -35,7 +47,7 @@ exports.getProductById = async (req, res) => {
   }
 };
 
-// Konkreetse toote uuendamine ID järgi (admin)
+// Toote uuendamine
 exports.updateProduct = async (req, res) => {
   try {
     const { name, price, description } = req.body;
@@ -54,7 +66,7 @@ exports.updateProduct = async (req, res) => {
   }
 };
 
-// Konkreetse toote kustutamine ID järgi (admin)
+// Toote kustutamine
 exports.deleteProduct = async (req, res) => {
   try {
     const product = await Product.findByPk(req.params.id);
