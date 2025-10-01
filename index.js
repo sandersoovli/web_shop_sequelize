@@ -1,8 +1,8 @@
 const express = require("express");
 const sequelize = require("./config/database");
-const { User } = require("./models/index");
+const { User, Cart } = require("./models/index");
 const adminRoutes = require("./routes/admin");
-
+const cartRoutes = require("./routes/cart");
 const app = express();
 const PORT = 3035;
 
@@ -25,7 +25,10 @@ app.use(express.urlencoded({ extended: true }));
       name: "Test Kasutaja",
       email: "test@example.com"
     });
-    console.log("✅ Dummy kasutaja loodud:", dummyUser.toJSON());
+
+    // Dummy kasutaja kaardi loomine
+    const dummyCart = await dummyUser.createCart();
+    console.log("✅ Dummy kasutaja ja kaart loodud:", dummyCart.toJSON());
 
     // Serveri käivitamine
     app.listen(PORT, () => {
@@ -43,3 +46,6 @@ app.get("/", (req, res) => {
 
 // Admin routes
 app.use("/admin", adminRoutes);
+
+// Cart routes
+app.use("/cart", cartRoutes);

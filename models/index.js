@@ -1,24 +1,27 @@
 const sequelize = require('../config/database');
 const User = require('./user');
 const Product = require('./product');
+const Cart = require('./cart');
+const CartItem = require('./cart-item');
+// Kui sul on Order mudel olemas, saab hiljem lisada
+// const Order = require('./order');
 
-let Cart, Order;
-try {
-  Cart = require('./cart');
-} catch {}
-try {
-  Order = require('./order');
-} catch {}
+// Seosed
 
-// Seosed, kui mudelid on olemas
-if (Cart) {
-  User.hasOne(Cart);
-  Cart.belongsTo(User);
+// User → Cart (1:1)
+User.hasOne(Cart);
+Cart.belongsTo(User);
 
-  Product.belongsToMany(Cart, { through: 'CartProducts' });
-  Cart.belongsToMany(Product, { through: 'CartProducts' });
-}
+// Cart → Product (N:M) läbi CartItem
+Cart.belongsToMany(Product, { through: CartItem });
+Product.belongsToMany(Cart, { through: CartItem });
 
+// User → Product (1:N) admini lisamiseks
+User.hasMany(Product);
+Product.belongsTo(User);
+
+// Order seosed saab lisada hiljem
+/*
 if (Order) {
   User.hasMany(Order);
   Order.belongsTo(User);
@@ -26,15 +29,13 @@ if (Order) {
   Product.belongsToMany(Order, { through: 'OrderProducts' });
   Order.belongsToMany(Product, { through: 'OrderProducts' });
 }
-
-// User → Product (admin)
-User.hasMany(Product);
-Product.belongsTo(User);
+*/
 
 module.exports = {
   sequelize,
   User,
   Product,
   Cart,
-  Order
+  CartItem
+  // Order
 };
